@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebraska School District Chronic Absenteeism</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="container">
+        <header>
+            <h1>Find your district's chronic absentee rate.</h1>
+            <p class="subtitle">Search below to see historical data for Nebraska school districts.</p>
+        </header>
+
+        <section class="search-section">
+            <div class="search-container">
+                <input type="text" id="district-search" placeholder="Search for a school district..." autocomplete="off">
+                <button id="search-btn">Search</button>
+            </div>
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+        </section>
+
+        <section id="results-section" class="results-section hidden">
+            <h2 id="district-name"></h2>
+            
+            <div class="chart-container">
+                <canvas id="absenteeChart"></canvas>
+            </div>
+
+            <div class="data-table-container">
+                <h3>Year-by-Year Breakdown</h3>
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th>School Year</th>
+                            <th>Chronic Absenteeism Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="error-message" class="hidden">
+            <p>No district found. Please try another search.</p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
