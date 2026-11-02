@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Nina Kudlacz</title>
+    <meta name="description" content="Nina Kudlacz is a journalism student at the University of Nebraska-Lincoln, a photographer and the Senior Multimedia Editor at the Daily Nebraskan.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --scarlet: #d00000;
+            --scarlet-dark: #a80000;
+            --bg: #faf8f5;
+            --card: #ffffff;
+            --text: #1c1917;
+            --muted: #6b645c;
+            --border: #e7e2da;
+            --radius: 14px;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --scarlet: #ff5a5a;
+                --scarlet-dark: #ff8080;
+                --bg: #151311;
+                --card: #1f1c19;
+                --text: #f3efe9;
+                --muted: #a39b91;
+                --border: #322e29;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: inherit; }
+        .wrap { max-width: 900px; margin: 0 auto; padding: 0 1.25rem; }
+
+        /* Nav */
+        nav { padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+        nav .wrap { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+        nav .brand { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem; text-decoration: none; }
+        nav ul { list-style: none; display: flex; gap: 1.25rem; font-size: 0.9rem; flex-wrap: wrap; }
+        nav ul a { text-decoration: none; color: var(--muted); transition: color .15s; }
+        nav ul a:hover { color: var(--scarlet); }
+
+        /* Hero */
+        .hero { padding: 4.5rem 0 3rem; }
+        .eyebrow {
+            display: inline-block;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+            color: var(--scarlet);
+            margin-bottom: 1rem;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.6rem, 8vw, 4.6rem);
+            line-height: 1.05;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .hero h1 em { color: var(--scarlet); font-style: italic; }
+        .hero .lede {
+            margin-top: 1.5rem;
+            font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+            color: var(--muted);
+            max-width: 40rem;
+            font-weight: 300;
+        }
+        .hero .lede strong { color: var(--text); font-weight: 500; }
+        .cta { margin-top: 2rem; display: flex; gap: .75rem; flex-wrap: wrap; }
+        .btn {
+            display: inline-block; padding: .7rem 1.3rem; border-radius: 999px;
+            font-size: .9rem; font-weight: 600; text-decoration: none;
+            border: 1.5px solid var(--scarlet); transition: all .15s;
+        }
+        .btn.primary { background: var(--scarlet); color: #fff; }
+        .btn.primary:hover { background: var(--scarlet-dark); border-color: var(--scarlet-dark); }
+        .btn.ghost { color: var(--scarlet); }
+        .btn.ghost:hover { background: var(--scarlet); color: #fff; }
+        @media (prefers-color-scheme: dark) {
+            .btn.primary { color: #151311; }
+            .btn.ghost:hover { color: #151311; }
+        }
+
+        /* Stats strip */
+        .stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1px; background: var(--border);
+            border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+            margin: 1rem 0 0;
+        }
+        .stat { background: var(--card); padding: 1.25rem 1.1rem; }
+        .stat b { display: block; font-family: 'Playfair Display', serif; font-size: 2rem; line-height: 1.1; color: var(--scarlet); }
+        .stat span { font-size: .82rem; color: var(--muted); }
+
+        /* Sections */
+        section { padding: 3.25rem 0 0; }
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem; margin-bottom: 1.25rem; letter-spacing: -0.01em;
+            display: flex; align-items: center; gap: .75rem;
+        }
+        h2::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+        .story p { margin-bottom: 1rem; max-width: 42rem; font-size: 1.05rem; }
+
+        /* Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.4rem;
+            transition: transform .15s, box-shadow .15s;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.07); }
+        .card h3 { font-size: 1.05rem; line-height: 1.3; }
+        .card .org { color: var(--scarlet); font-size: .88rem; font-weight: 500; margin-top: .15rem; }
+        .card .when { color: var(--muted); font-size: .8rem; margin: .25rem 0 .75rem; }
+        .card p { font-size: .94rem; color: var(--muted); }
+
+        /* Timeline */
+        .timeline { list-style: none; border-left: 2px solid var(--border); margin-left: .4rem; }
+        .timeline li { position: relative; padding: 0 0 1.75rem 1.5rem; }
+        .timeline li::before {
+            content: ""; position: absolute; left: -7px; top: .45rem;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: var(--bg); border: 2px solid var(--scarlet);
+        }
+        .timeline li.now::before { background: var(--scarlet); }
+        .timeline h3 { font-size: 1.05rem; }
+        .timeline .meta { color: var(--muted); font-size: .85rem; margin-bottom: .35rem; }
+        .timeline p { font-size: .95rem; max-width: 40rem; }
+
+        /* Highlights */
+        .highlights { list-style: none; display: grid; gap: .75rem; }
+        .highlights li {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 1rem 1.25rem 1rem 3.2rem; position: relative;
+        }
+        .highlights li::before {
+            content: "★"; position: absolute; left: 1.2rem; top: 1rem; color: var(--scarlet);
+        }
+        .highlights small { display: block; color: var(--muted); font-size: .82rem; }
+
+        /* Skills */
+        .tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .tag {
+            padding: .4rem .9rem; border-radius: 999px; font-size: .88rem;
+            background: var(--card); border: 1px solid var(--border);
+        }
+        .skill-group { margin-bottom: 1.5rem; }
+        .skill-group h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: .6rem; font-weight: 600; }
+
+        /* Contact */
+        .contact {
+            margin-top: 3.5rem; padding: 2.5rem 1.75rem; border-radius: var(--radius);
+            background: var(--scarlet); color: #fff; text-align: center;
+        }
+        .contact h2 { justify-content: center; color: #fff; margin-bottom: .5rem; }
+        .contact h2::after { display: none; }
+        .contact p { opacity: .92; max-width: 32rem; margin: 0 auto 1.5rem; }
+        .contact .btn { border-color: #fff; color: #fff; }
+        .contact .btn.solid { background: #fff; color: var(--scarlet-dark); }
+        .contact .btn:hover { opacity: .88; }
+        @media (prefers-color-scheme: dark) {
+            .contact { background: #8f1b1b; }
+            .contact .btn.solid { color: #8f1b1b; }
+        }
+
+        footer { padding: 2rem 0 3rem; text-align: center; font-size: .82rem; color: var(--muted); }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .card { transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="wrap">
+            <a class="brand" href="../">Nina Kudlacz</a>
+            <ul>
+                <li><a href="#story">Story</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#highlights">Highlights</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="wrap">
+            <span class="eyebrow">Journalist · Photographer · Multimedia Editor</span>
+            <h1>Hi, I'm Nina.<br>I tell stories with <em>words &amp; images.</em></h1>
+            <p class="lede">
+                I'm a <strong>journalism student at the University of Nebraska-Lincoln</strong> studying
+                Advertising and Public Relations, and the <strong>Senior Multimedia Editor at the Daily Nebraskan</strong>.
+                I've been behind a camera since 2021 and I haven't put it down.
+            </p>
+            <div class="cta">
+                <a class="btn primary" href="#contact">Get in touch</a>
+                <a class="btn ghost" href="https://www.linkedin.com/in/nina-marie-kudlacz-b197402bb/" target="_blank" rel="noopener">LinkedIn</a>
+            </div>
+
+            <div class="stats">
+                <div class="stat"><b>20</b><span>students on the multimedia team I hired &amp; manage</span></div>
+                <div class="stat"><b>2027</b><span>graduating with a Bachelor of Journalism</span></div>
+                <div class="stat"><b>3</b><span>major events covered, from an election to a national championship</span></div>
+                <div class="stat"><b>2</b><span>languages: English &amp; French</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap">
+
+        <section id="story" class="story">
+            <h2>My story</h2>
+            <p>
+                I grew up in the Omaha area, and I started my own photography business, Nina Kudlacz Photography, in 2021.
+                Working with clients taught me something I still rely on today: the best photos happen when people feel
+                comfortable, so my first job is always to make the space feel easy.
+            </p>
+            <p>
+                At the University of Nebraska-Lincoln, I found a home at the <strong>Daily Nebraskan</strong>, first as a
+                photographer, then as Senior Multimedia Editor. There I hire, lead and coach a team of twenty, plan our
+                weekly coverage, and look for new ways to weave photo, video and design into reporting so a story
+                lands harder than text alone could.
+            </p>
+            <p>
+                I'm studying journalism with a focus on advertising and public relations because I love the whole arc of
+                a message: finding the story, shaping it, and getting it in front of the people who need to see it.
+                I'm also minoring in French, because I'd like to tell stories in more than one language.
+            </p>
+        </section>
+
+        <section id="experience">
+            <h2>Experience</h2>
+            <ol class="timeline">
+                <li class="now">
+                    <h3>Senior Multimedia Editor</h3>
+                    <div class="meta">Daily Nebraskan · Aug 2024 – Present</div>
+                    <p>Hired and manage a group of twenty members, organize professional coverage every week, and integrate multimedia with journalism in a new way.</p>
+                </li>
+                <li class="now">
+                    <h3>Social Media &amp; Marketing Intern</h3>
+                    <div class="meta">UNL College of Business · Apr 2024 – Present</div>
+                    <p>Write stories curated for the University's brand, and plan, create and post social media content.</p>
+                </li>
+                <li class="now">
+                    <h3>Photographer</h3>
+                    <div class="meta">Daily Nebraskan · Sep 2023 – Present</div>
+                    <p>Worked alongside reporters on assignments and organized and shot endowment projects.</p>
+                </li>
+                <li class="now">
+                    <h3>Founder &amp; Photographer</h3>
+                    <div class="meta">Nina Kudlacz Photography · Jan 2021 – Present · Omaha &amp; Lincoln, NE</div>
+                    <p>Work with clients to get the result they're looking for, and create comfortable environments where people can be themselves.</p>
+                </li>
+                <li>
+                    <h3>Barista</h3>
+                    <div class="meta">Applewood Hy-Vee (Starbucks) · Oct 2022 – Aug 2024</div>
+                    <p>Solved problems and communicated with customers to take and serve orders.</p>
+                </li>
+            </ol>
+        </section>
+
+        <section id="highlights">
+            <h2>Highlights</h2>
+            <ul class="highlights">
+                <li>Covered the 2024 presidential election<small>Daily Nebraskan</small></li>
+                <li>Shot the 2024 Pinstripe Mowers Bowl in New York City<small>Daily Nebraskan</small></li>
+                <li>Shot the 2023 Women's Volleyball National Championship in Tampa<small>Daily Nebraskan</small></li>
+                <li>Published in a national magazine<small>Photography</small></li>
+                <li>Published in print locally, twice<small>Photography</small></li>
+                <li>First place, National Press Women's high school contest<small>Feature story</small></li>
+            </ul>
+        </section>
+
+        <section id="skills">
+            <h2>Skills</h2>
+            <div class="skill-group">
+                <h3>Creative tools</h3>
+                <div class="tags">
+                    <span class="tag">Photoshop</span>
+                    <span class="tag">Illustrator</span>
+                    <span class="tag">Lightroom</span>
+                    <span class="tag">InDesign</span>
+                    <span class="tag">Typography</span>
+                    <span class="tag">HTML Web Design</span>
+                    <span class="tag">Canon Digital Cameras</span>
+                </div>
+            </div>
+            <div class="skill-group">
+                <h3>Office</h3>
+                <div class="tags">
+                    <span class="tag">Word</span>
+                    <span class="tag">Outlook</span>
+                    <span class="tag">PowerPoint</span>
+                </div>
+            </div>
+            <div class="skill-group">
+                <h3>Languages</h3>
+                <div class="tags">
+                    <span class="tag">English (fluent)</span>
+                    <span class="tag">French (conversational)</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>Things I've built</h2>
+            <div class="grid">
+                <a class="card" href="../major-search/" style="text-decoration:none">
+                    <h3>UNL Major Headcount Search</h3>
+                    <div class="org">Daily Nebraskan data project</div>
+                    <p>Search enrollment numbers for majors at the University of Nebraska-Lincoln.</p>
+                </a>
+                <a class="card" href="../School-search/" style="text-decoration:none">
+                    <h3>Nebraska Chronic Absenteeism</h3>
+                    <div class="org">Data visualization</div>
+                    <p>Look up historical chronic absentee rates for Nebraska school districts.</p>
+                </a>
+            </div>
+        </section>
+
+        <section id="contact" class="contact">
+            <h2>Let's work together</h2>
+            <p>Have a story, a shoot or an opportunity in mind? I'd love to hear about it.</p>
+            <div class="cta" style="justify-content:center; margin-top:0">
+                <a class="btn solid" href="mailto:nkudlacz2@huskers.unl.edu">Email me</a>
+                <a class="btn" href="https://www.linkedin.com/in/nina-marie-kudlacz-b197402bb/" target="_blank" rel="noopener">Connect on LinkedIn</a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="wrap">© <span id="year">2026</span> Nina Kudlacz · Lincoln, Nebraska</div>
+    </footer>
+
+    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
