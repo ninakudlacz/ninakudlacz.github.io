@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groundhog Day Predictor Search</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app">
+        <header class="intro">
+            <h1>Find a Groundhog Day predictor</h1>
+            <p class="subtitle">Search by name, state or province, or type of creature, and see each predictor's record since 1990.</p>
+        </header>
+
+        <section class="controls" aria-label="Search and filters">
+            <label class="field field-search">
+                <span class="label">Name or place</span>
+                <input type="search" id="q" placeholder="Try &ldquo;Phil&rdquo;, &ldquo;Ohio&rdquo; or &ldquo;armadillo&rdquo;" autocomplete="off">
+            </label>
+            <label class="field">
+                <span class="label">State / province</span>
+                <select id="region"><option value="">All</option></select>
+            </label>
+            <label class="field">
+                <span class="label">Sort by</span>
+                <select id="sort">
+                    <option value="name">Name (A&ndash;Z)</option>
+                    <option value="acc">Most accurate</option>
+                    <option value="made">Most predictions</option>
+                    <option value="recent">Most recently added</option>
+                </select>
+            </label>
+
+            <fieldset class="chips" id="groups">
+                <legend class="label">Type of creature</legend>
+            </fieldset>
+
+            <label class="check"><input type="checkbox" id="active"> Active predictors only</label>
+        </section>
+
+        <div class="status-row">
+            <p id="count" class="count" role="status" aria-live="polite"></p>
+            <button type="button" id="reset" class="link-btn" hidden>Clear filters</button>
+        </div>
+
+        <ul id="results" class="results"></ul>
+        <p id="empty" class="empty" hidden>No predictors match. Try a different name, or clear a filter.</p>
+
+        <footer class="foot">
+            <div class="legend" aria-hidden="true">
+                <span><i class="sw s"></i>Saw shadow (6 more weeks of winter)</span>
+                <span><i class="sw n"></i>No shadow (early spring)</span>
+                <span><i class="sw x"></i>No result recorded</span>
+                <span><i class="sw o"></i>Not tracked that year</span>
+            </div>
+            <details class="method">
+                <summary>How &ldquo;right&rdquo; is scored</summary>
+                <p>Each call is checked against the average temperature for February and March in the predictor's state, compared with that state's 1991&ndash;2020 normal. A shadow (six more weeks of winter) is right if those two months ran colder than normal. No shadow (early spring) is right if they ran warmer. Years exactly at normal aren't scored. Canadian predictors aren't scored because this uses U.S. data; Washington, D.C. uses Maryland's figures. &ldquo;Most accurate&rdquo; ranks predictors with at least 5 scored years. Because the weather outcome is a coin flip, 50% is what guessing earns.</p>
+            </details>
+            <p>Predictions: <a href="https://groundhog-day.com" target="_blank" rel="noopener">groundhog-day.com</a>. Temperatures: <a href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series" target="_blank" rel="noopener">NOAA NCEI Climate at a Glance</a>. This is our own scoring, not an official one.</p>
+        </footer>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
