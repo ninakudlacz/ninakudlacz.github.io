@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Enrollment by Major</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app">
+        <header class="intro">
+            <h1>How many students are in each major?</h1>
+            <p class="subtitle">Search for a major to see its fall enrollment from 2016 to 2025.</p>
+        </header>
+
+        <section class="search" aria-label="Search majors">
+            <label class="label" for="q">Major</label>
+            <input type="search" id="q" placeholder="Try &ldquo;nursing&rdquo;, &ldquo;computer&rdquo; or &ldquo;history&rdquo;" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="list" aria-autocomplete="list">
+            <p id="hint" class="hint"></p>
+            <ul id="list" class="list" role="listbox" aria-label="Matching majors"></ul>
+        </section>
+
+        <section id="detail" class="detail" aria-live="polite" hidden>
+            <div class="detail-head">
+                <h2 id="title"></h2>
+                <p id="summary" class="summary"></p>
+            </div>
+
+            <div class="stats" id="stats"></div>
+
+            <figure class="chart-wrap">
+                <div id="chart" class="chart"></div>
+                <div id="tip" class="tip" hidden></div>
+                <figcaption class="cap">Total students in this major each fall, all colleges and degree levels combined.</figcaption>
+            </figure>
+
+            <details class="programs" id="programs-box">
+                <summary>See the numbers by program</summary>
+                <div class="table-scroll"><table id="table"></table></div>
+            </details>
+        </section>
+
+        <footer class="foot">
+            <p>Counts are students enrolled in each major in the fall term. A student with more than one major is counted in each. Majors that changed names or codes over the years may appear as more than one entry, and a gap in the chart means the major wasn&rsquo;t offered or had no students that fall. Raikes and Omaha program variants are combined with their main major.</p>
+        </footer>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
