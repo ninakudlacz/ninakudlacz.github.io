@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Throwback | The Daily Nebraskan</title>
+    <meta name="description" content="Guess where and when each photo of UNL's City and East campuses was taken.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="masthead">
+        <div class="masthead-inner">
+            <a class="brand" href="https://www.dailynebraskan.com/" target="_blank" rel="noopener">The Daily Nebraskan</a>
+            <button class="link-btn" id="how-btn" type="button">How to play</button>
+        </div>
+    </header>
+
+    <main class="app">
+        <!-- HOME -->
+        <section id="screen-home" class="screen">
+            <div class="intro">
+                <h1>Campus Throwback</h1>
+                <p class="subtitle">Five photos from UNL&rsquo;s City and East campuses. Guess where each one was taken and what year. Up to 10,000 points a photo.</p>
+            </div>
+
+            <div class="modes">
+                <article class="mode mode-daily">
+                    <p class="kicker">Daily</p>
+                    <h2>Today&rsquo;s Throwback</h2>
+                    <p id="daily-status" class="mode-text">The same five photos for everyone, new each day at midnight.</p>
+                    <button class="btn btn-primary" id="daily-btn" type="button">Play today&rsquo;s game</button>
+                    <p id="streak" class="meta"></p>
+                </article>
+                <article class="mode">
+                    <p class="kicker">Single player</p>
+                    <h2>Unlimited</h2>
+                    <p class="mode-text">Play as many rounds as you like. Afterward, send a friend a link to the same five photos.</p>
+                    <button class="btn" id="solo-btn" type="button">Start a game</button>
+                </article>
+                <article class="mode">
+                    <p class="kicker">Multiplayer</p>
+                    <h2>Play with friends</h2>
+                    <p class="mode-text">Start a room, share the code and play the same photos at the same time.</p>
+                    <div class="mp-actions">
+                        <button class="btn" id="host-btn" type="button">Create a room</button>
+                        <button class="btn btn-ghost" id="join-open-btn" type="button">Join a room</button>
+                    </div>
+                </article>
+            </div>
+            <p id="challenge-banner" class="banner" hidden></p>
+        </section>
+
+        <!-- LOBBY -->
+        <section id="screen-lobby" class="screen" hidden>
+            <button class="back" type="button" data-home>&larr; Leave</button>
+            <div class="card lobby">
+                <div id="lobby-join" hidden>
+                    <h2>Join a room</h2>
+                    <label class="label" for="join-code">Room code</label>
+                    <input id="join-code" class="text-input code-input" maxlength="5" autocomplete="off" autocapitalize="characters" placeholder="ABCDE">
+                </div>
+                <div id="lobby-room" hidden>
+                    <p class="kicker">Room code</p>
+                    <p id="room-code" class="room-code"></p>
+                    <button class="link-btn" id="copy-room" type="button">Copy invite link</button>
+                </div>
+                <label class="label" for="player-name">Your name</label>
+                <input id="player-name" class="text-input" maxlength="20" autocomplete="nickname" placeholder="Herbie">
+                <button class="btn btn-primary" id="join-btn" type="button" hidden>Join</button>
+
+                <div id="lobby-players" hidden>
+                    <h3>Players</h3>
+                    <ul id="player-list" class="player-list"></ul>
+                    <div id="host-controls" hidden>
+                        <label class="check"><input type="checkbox" id="timer-on" checked> 60-second timer each round</label>
+                        <button class="btn btn-primary" id="start-mp" type="button">Start game</button>
+                    </div>
+                    <p id="lobby-wait" class="meta" hidden>Waiting for the host to start&hellip;</p>
+                </div>
+                <p id="lobby-msg" class="hint" role="status"></p>
+            </div>
+        </section>
+
+        <!-- GAME -->
+        <section id="screen-game" class="screen" hidden>
+            <div class="game-bar">
+                <button class="back" type="button" id="quit-btn">&larr; Quit</button>
+                <span id="mode-label" class="mode-label"></span>
+                <span class="round">Round <b id="round-n">1</b>/5</span>
+                <span id="timer" class="timer" hidden></span>
+                <span class="total">Score <b id="total">0</b></span>
+            </div>
+
+            <div class="game-grid">
+                <figure class="photo-wrap">
+                    <button class="photo-btn" id="photo-btn" type="button" aria-label="Enlarge photo">
+                        <img id="photo" alt="Mystery photo of campus">
+                    </button>
+                    <figcaption class="photo-hint">Click the photo to enlarge it</figcaption>
+                </figure>
+
+                <div class="guess-panel">
+                    <div class="map-wrap">
+                        <div id="map" class="map" aria-label="Campus map. Click to place your guess."></div>
+                        <div class="campus-jump">
+                            <button type="button" class="chip" data-jump="city">City Campus</button>
+                            <button type="button" class="chip" data-jump="east">East Campus</button>
+                        </div>
+                    </div>
+                    <div class="year-box">
+                        <label class="label" for="year">Year</label>
+                        <div class="year-row">
+                            <button class="step" type="button" data-step="-1" aria-label="One year earlier">&minus;</button>
+                            <output id="year-out" class="year-out">1975</output>
+                            <button class="step" type="button" data-step="1" aria-label="One year later">+</button>
+                        </div>
+                        <input type="range" id="year" min="1900" max="2026" value="1975">
+                        <div class="year-ends"><span>1900</span><span id="year-max">2026</span></div>
+                    </div>
+                    <button class="btn btn-primary btn-wide" id="guess-btn" type="button" disabled>Place a pin on the map</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROUND RESULT -->
+        <section id="screen-result" class="screen" hidden>
+            <div class="card result">
+                <div class="result-head">
+                    <div>
+                        <p class="kicker" id="res-round"></p>
+                        <h2 id="res-place"></h2>
+                        <p id="res-caption" class="summary"></p>
+                    </div>
+                    <div class="res-score"><span id="res-points">0</span><small>/ 10,000</small></div>
+                </div>
+                <div class="result-grid">
+                    <div id="res-map" class="map res-map"></div>
+                    <div class="res-side">
+                        <img id="res-photo" class="res-photo" alt="">
+                        <div class="stats">
+                            <div class="stat"><p class="k">Location</p><p class="v" id="res-loc-pts">0</p><p class="s" id="res-dist"></p></div>
+                            <div class="stat"><p class="k">Year</p><p class="v" id="res-year-pts">0</p><p class="s" id="res-year"></p></div>
+                        </div>
+                        <ol id="res-board" class="board" hidden></ol>
+                        <p class="credit" id="res-credit"></p>
+                    </div>
+                </div>
+                <div class="result-actions">
+                    <p id="res-wait" class="meta" hidden></p>
+                    <button class="btn btn-primary" id="next-btn" type="button">Next photo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FINAL -->
+        <section id="screen-final" class="screen" hidden>
+            <div class="card final">
+                <p class="kicker" id="final-kicker"></p>
+                <h2 class="final-score"><span id="final-total">0</span><small> / 50,000</small></h2>
+                <p id="final-line" class="summary"></p>
+                <ol id="final-board" class="board board-final" hidden></ol>
+                <div class="table-scroll">
+                    <table class="rounds">
+                        <thead><tr><th>#</th><th>Photo</th><th>Answer</th><th>Your guess</th><th>Points</th></tr></thead>
+                        <tbody id="final-rows"></tbody>
+                    </table>
+                </div>
+                <div class="final-actions">
+                    <button class="btn btn-primary" id="share-btn" type="button">Share result</button>
+                    <button class="btn" id="challenge-btn" type="button">Challenge a friend</button>
+                    <button class="btn btn-ghost" id="again-btn" type="button">Play again</button>
+                    <button class="btn btn-ghost" type="button" data-home>Home</button>
+                </div>
+                <p id="share-msg" class="hint" role="status"></p>
+            </div>
+        </section>
+
+        <footer class="foot">
+            <p>Photos are from Wikimedia Commons, the Library of Congress and the National Archives. Each photo&rsquo;s credit and license appear after you guess it. Map &copy; OpenStreetMap contributors.</p>
+        </footer>
+    </main>
+
+    <div id="lightbox" class="lightbox" hidden>
+        <button class="lightbox-close" type="button" aria-label="Close">&times;</button>
+        <img id="lightbox-img" alt="">
+    </div>
+
+    <dialog id="how" class="how">
+        <h2>How to play</h2>
+        <ol>
+            <li>Look at the photo. Click it to see it full size.</li>
+            <li>Click the map where you think it was taken. Both City and East campus count.</li>
+            <li>Pick the year it was taken with the slider.</li>
+            <li>You get up to 5,000 points for location and 5,000 for the year. Within about 25 meters, or the exact year, earns the full 5,000.</li>
+        </ol>
+        <p>The daily game is the same for everyone and can be played once a day. Your streak counts the days in a row you&rsquo;ve played.</p>
+        <form method="dialog"><button class="btn btn-primary">Got it</button></form>
+    </dialog>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="photos.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
