@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratboy and Wondergirl | The Daily Nebraskan</title>
+    <meta name="description" content="A Daily Nebraskan parody game. Guide Fratboy and Wondergirl through UNL's Greek Row, grab free drinks and watch out for the wrong water.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Open+Sans:wght@400;600;700&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="masthead">
+        <div class="masthead-inner">
+            <a class="brand" href="https://www.dailynebraskan.com/" target="_blank" rel="noopener">The Daily Nebraskan</a>
+            <button class="link-btn" id="how-btn" type="button">How to play</button>
+        </div>
+    </header>
+
+    <main class="app">
+        <div class="intro">
+            <p class="kicker">Games &middot; Parody</p>
+            <h1>Fratboy and Wondergirl</h1>
+            <p class="subtitle">Fratboy just wants a fun, lighthearted night out with Wondergirl. Escape every house on Greek Row to get to the next one, grab the free drinks and watch which water you step in. Fratboy can handle red, Wondergirl can handle blue and nobody survives green.</p>
+        </div>
+
+        <div class="hud" id="hud">
+            <div class="hud-left">
+                <span class="hud-house" id="hud-house">Greek Row</span>
+                <span class="hud-theme" id="hud-theme"></span>
+            </div>
+            <div class="hud-right">
+                <span class="hud-stat" title="Beers Fratboy has grabbed">&#127866; <b id="hud-beer">0/0</b></span>
+                <span class="hud-stat" title="Shooters Wondergirl has grabbed">&#129347; <b id="hud-shot">0/0</b></span>
+                <span class="hud-stat" title="Time">&#9201; <b id="hud-time">0:00</b></span>
+                <button class="btn btn-small" id="restart-btn" type="button" title="Restart (R)">Restart</button>
+                <button class="btn btn-small" id="menu-btn" type="button" title="Pause (Esc)">Menu</button>
+            </div>
+        </div>
+
+        <div class="stage" id="stage">
+            <canvas id="game" width="960" height="640" aria-label="Fratboy and Wondergirl game"></canvas>
+            <div class="overlay" id="overlay"></div>
+        </div>
+
+        <div class="touch" id="touch" hidden>
+            <div class="pad pad-wonder" aria-label="Wondergirl controls">
+                <span class="pad-name">Wondergirl</span>
+                <button type="button" data-who="wonder" data-key="left" aria-label="Left">&#9664;</button>
+                <button type="button" data-who="wonder" data-key="right" aria-label="Right">&#9654;</button>
+                <button type="button" data-who="wonder" data-key="action" aria-label="Pull lever">&#8659;</button>
+                <button type="button" data-who="wonder" data-key="jump" aria-label="Jump">&#9650;</button>
+            </div>
+            <div class="pad pad-frat" aria-label="Fratboy controls">
+                <span class="pad-name">Fratboy</span>
+                <button type="button" data-who="frat" data-key="left" aria-label="Left">&#9664;</button>
+                <button type="button" data-who="frat" data-key="right" aria-label="Right">&#9654;</button>
+                <button type="button" data-who="frat" data-key="action" aria-label="Pull lever">&#8659;</button>
+                <button type="button" data-who="frat" data-key="jump" aria-label="Jump">&#9650;</button>
+            </div>
+        </div>
+
+        <section class="info">
+            <div class="card controls-card">
+                <h2>Controls</h2>
+                <div class="controls-grid">
+                    <div class="ctrl ctrl-frat">
+                        <p class="kicker">Fratboy</p>
+                        <p><kbd>&larr;</kbd> <kbd>&rarr;</kbd> move &middot; <kbd>&uarr;</kbd> jump &middot; <kbd>&darr;</kbd> pull a lever</p>
+                    </div>
+                    <div class="ctrl ctrl-wonder">
+                        <p class="kicker">Wondergirl</p>
+                        <p><kbd>A</kbd> <kbd>D</kbd> move &middot; <kbd>W</kbd> jump &middot; <kbd>S</kbd> pull a lever</p>
+                    </div>
+                </div>
+                <p class="meta"><kbd>R</kbd> restarts the house. <kbd>Esc</kbd> pauses. Two players share one keyboard, or one brave person plays both.</p>
+            </div>
+            <div class="card hazards-card">
+                <h2>Know before you go</h2>
+                <ul class="hazards">
+                    <li><span class="sw sw-gem-r"></span><b>Red diamonds</b> are Fratboy&rsquo;s. Each one is a free beer.</li>
+                    <li><span class="sw sw-gem-b"></span><b>Blue diamonds</b> are Wondergirl&rsquo;s. Each one is a free shooter.</li>
+                    <li><span class="sw sw-red"></span><b>Red water</b> is safe for Fratboy. If Wondergirl falls in, the night ends. Diagnosis: gonorrhea.</li>
+                    <li><span class="sw sw-blue"></span><b>Blue water</b> is safe for Wondergirl. If Fratboy falls in, the night ends. Diagnosis: chlamydia.</li>
+                    <li><span class="sw sw-green"></span><b>Green water</b> ends the night for both of them. Your frat gets kicked off campus or put on probation.</li>
+                    <li><span class="sw sw-keg"></span><b>Kegs</b> can be pushed. <b>Buttons</b> work while someone stands on them. <b>Levers</b> stay where you leave them.</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer class="foot">
+            <p>A Daily Nebraskan parody. This game is satire. House names are used for the setting only, and nothing in it is a claim about any real chapter, its members or its standing with the university. Not affiliated with or endorsed by any fraternity, the University of Nebraska&ndash;Lincoln or the makers of the game it spoofs. Real talk: get tested, look out for your friends and drink responsibly.</p>
+        </footer>
+    </main>
+
+    <script src="levels.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
