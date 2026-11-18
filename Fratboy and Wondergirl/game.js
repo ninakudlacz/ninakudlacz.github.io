@@ -13,6 +13,7 @@
         green: ['#a6f26a', '#3fae2a', '#1b5e12']
     };
     const LEVELS = window.LEVELS;
+    const STORY = window.STORY;
     const STORE_KEY = 'fratboy-wondergirl-v2';
 
     const canvas = document.getElementById('game');
@@ -99,6 +100,10 @@
     let levelIndex = 0;
     let level, grid, platforms, buttons, levers, doors, gems, kegs, players, popups, particles;
     let frame = 0, levelFrames = 0, winTimer = 0, deathTimer = 0, death = null;
+    let dd = null, sticky = new Set(), chatDone = null;
+    const darkCanvas = document.createElement('canvas');
+    darkCanvas.width = W; darkCanvas.height = H;
+    const darkCtx = darkCanvas.getContext('2d');
     let bgLayer, tileLayer;
 
     const overlap = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -139,10 +144,32 @@
             const s = spawns[who];
             const p = makeEnt('player', s.c * T + (T - PW) / 2, (s.r + 1) * T - PH, PW, PH, who);
             p.facing = 1;
+            p.spawn = { x: p.x, y: p.y };
+            p.inv = 0;
             let guard = 0;
             while (solidAt(p, p) && guard++ < 64) p.y -= 1;
             return p;
         });
+
+        const tw = level.twists || {};
+        dd = null;
+        if (tw.dd && level.dd) {
+            const [c, r] = level.dd;
+            dd = { x: c * T + 5, y: r * T - 36, w: 22, h: 36, row: r, dir: 1, speed: tw.timer ? 1.4 : 1.1, walk: 0 };
+        }
+        sticky = new Set();
+        if (tw.sticky) {
+            // Jungle juice pools up on the floor right next to each pool of water
+            for (let r = 1; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (!LIQUID[grid[r][c]]) continue;
+                    for (const dc of [-1, -2, 1, 2]) {
+                        const cc = c + dc;
+                        if (tileAt(cc, r) === '#' && tileAt(cc, r - 1) !== '#' && !LIQUID[tileAt(cc, r - 1)]) sticky.add(cc + ',' + r);
+                    }
+                }
+            }
+        }
         buildStatic();
     }
 
@@ -256,6 +283,27 @@
             }
         }
 
+        // Designated Driver
+        if (dd) {
+            const nx = dd.x + dd.dir * dd.speed;
+            const front = Math.floor((dd.dir > 0 ? nx + dd.w + 2 : nx - 2) / T);
+            if (tileAt(front, dd.row) !== '#' || tileAt(front, dd.row - 1) === '#') dd.dir *= -1;
+            else dd.x = nx;
+            dd.walk += 0.2;
+            for (const pl of players) {
+                if (pl.dead || pl.atDoor || pl.inv > 0) continue;
+                if (overlap({ x: pl.x + 3, y: pl.y + 4, w: pl.w - 6, h: pl.h - 4 }, { x: dd.x + 3, y: dd.y + 4, w: dd.w - 6, h: dd.h - 4 })) {
+                    popups.push({ x: dd.x + dd.w / 2, y: dd.y - 6, text: pick(['DD: \u201CLet\u2019s get you home.\u201D', 'DD: \u201CCar\u2019s outside. Let\u2019s go.\u201D', 'DD: \u201CYou\u2019re done, buddy.\u201D']), t: 0, color: '#f4ff4a' });
+                    pl.x = pl.spawn.x; pl.y = pl.spawn.y; pl.vy = 0; pl.inv = 90;
+                    let guard = 0;
+                    while (solidAt(pl, pl) && guard++ < 64) pl.y -= 1;
+                }
+            }
+        }
+
+        // Nationals walkthrough countdown
+        if (level.twists && level.twists.timer && levelFrames >= level.twists.timer * 60) { timeUp(); return; }
+
         // Doors
         let both = true;
         for (const pl of players) {
@@ -269,7 +317,7 @@
         if (winTimer > 32) { winLevel(); return; }
 
         levelFrames++;
-        if (levelFrames % 30 === 0) updateHud();
+        if (levelFrames % 15 === 0) updateHud();
     }
 
     function updatePlayer(pl) {
@@ -278,10 +326,12 @@
         pl.moving = dir !== 0;
         pl.pushing = false;
         if (dir) pl.facing = dir;
-        moveX(pl, dir * (pl.onGround ? RUN : AIR_RUN));
+        const onJuice = pl.onGround && sticky.has(Math.floor((pl.x + pl.w / 2) / T) + ',' + Math.floor((pl.y + pl.h + 1) / T));
+        moveX(pl, dir * (pl.onGround ? (onJuice ? 1.9 : RUN) : AIR_RUN));
 
         pl.onGround = !!solidAt({ x: pl.x, y: pl.y + 1, w: pl.w, h: pl.h }, pl);
-        if (c.jump && pl.onGround) { pl.vy = -JUMP_V; pl.onGround = false; }
+        if (c.jump && pl.onGround) { pl.vy = onJuice ? -8.8 : -JUMP_V; pl.onGround = false; }
+        if (pl.inv > 0) pl.inv--;
         if (!c.jump && pl.vy < -4) pl.vy = -4;
         pl.vy = Math.min(pl.vy + GRAV, MAX_FALL);
         pl.onGround = false;
@@ -304,7 +354,7 @@
             const goal = p.active ? 1 : 0;
             if (p.t === goal) continue;
             const len = Math.hypot(p.dx, p.dy);
-            const dt = PLAT_SPEED / len;
+            const dt = (level.platformSpeed || PLAT_SPEED) / len;
             const nt = goal > p.t ? Math.min(goal, p.t + dt) : Math.max(goal, p.t - dt);
             const nx = p.x0 + p.dx * nt, ny = p.y0 + p.dy * nt;
             const my = ny - p.y;
@@ -350,7 +400,20 @@
         releaseAll();
     }
 
+    function timeUp() {
+        death = { who: null, type: 'timer' };
+        deathTimer = 30;
+        state = 'dying';
+        releaseAll();
+    }
+
     // ---------- Flow ----------
+    // Start a house, showing the group chat first when a new chapter begins.
+    function begin(i) {
+        const ch = STORY.chapters.find((c) => c.from === i);
+        if (ch) showChat(ch, () => startLevel(i));
+        else startLevel(i);
+    }
     function startLevel(i) {
         levelIndex = i;
         loadLevel(i);
@@ -362,7 +425,9 @@
         if (i === 0 && !save.seenTip) {
             save.seenTip = true; persist();
         }
-        popups.push({ x: W / 2, y: 80, text: level.tip, t: -120, color: '#fff', big: true });
+        const hint = STORY.chapters[level.chapter || 0].hint;
+        if (hint) popups.push({ x: W / 2, y: 70, text: hint, t: -150, color: '#f4ff4a', big: true });
+        popups.push({ x: W / 2, y: hint ? 112 : 80, text: level.tip, t: -120, color: '#fff', big: true });
     }
 
     function pause() {
@@ -390,7 +455,19 @@
         $('hud-theme').textContent = 'Theme: ' + level.theme;
         $('hud-beer').textContent = c.beer + '/' + c.beerTotal;
         $('hud-shot').textContent = c.shot + '/' + c.shotTotal;
-        $('hud-time').textContent = fmtTime(levelFrames);
+        const limit = level.twists && level.twists.timer;
+        const timeEl = $('hud-time');
+        if (limit) {
+            const left = Math.max(0, limit * 60 - levelFrames);
+            timeEl.textContent = fmtTime(left + 59) + ' left';
+            timeEl.classList.toggle('hud-warn', left < 20 * 60);
+        } else {
+            timeEl.textContent = fmtTime(levelFrames);
+            timeEl.classList.remove('hud-warn');
+        }
+        // Every free drink makes things a tiny bit blurrier
+        const drinks = c.beer + c.shot;
+        canvas.style.filter = drinks ? `blur(${(drinks * 0.14).toFixed(2)}px)` : '';
     }
 
     const DIAG = {
@@ -401,6 +478,10 @@
         blue: {
             head: 'You got chlamydia.',
             lines: ['The blue water was not a vibe.', 'It’s treatable, but this night is over.', 'Level over. Get tested and try again.']
+        },
+        timer: {
+            head: 'Your frat is on probation.',
+            lines: ['Risk management found 40 people and one working light bulb.', 'The walkthrough report is already in someone\u2019s inbox.', 'No socials until further notice.']
         },
         green: [
             { head: 'Your frat got kicked off campus.', lines: ['Nationals has been notified.', 'The green water was a conduct violation.', 'The composite photo is coming down.'] },
@@ -413,10 +494,11 @@
         state = 'dead';
         const name = death.who === 'frat' ? 'Fratboy' : 'Wondergirl';
         const d = death.type === 'green' ? pick(DIAG.green) : DIAG[death.type];
+        const lead = death.type === 'timer' ? 'Nationals walked in before you got out.' : `${name} fell in the ${death.type} water.`;
         overlay.innerHTML = `
-            <div class="ov-card ov-${death.type}" role="dialog" aria-live="assertive">
+            <div class="ov-card ov-${death.type === 'timer' ? 'green' : death.type}" role="dialog" aria-live="assertive">
                 <p class="kicker">${houseTitle(level)} &middot; Night over</p>
-                <p>${name} fell in the ${death.type} water.</p>
+                <p>${lead}</p>
                 <p class="big">${d.head}</p>
                 <p>${pick(d.lines)}</p>
                 <div class="actions">
@@ -461,7 +543,37 @@
         bindOverlay();
     }
 
+    function showChat(ch, done, finale) {
+        state = 'story';
+        releaseAll();
+        chatDone = done;
+        const side = (who) => (who === 'Fratboy' ? 'me' : who === 'Wondergirl' ? 'wg' : 'other');
+        const bubbles = ch.chat.map(([who, text], k) => `
+            <div class="msg msg-${side(who)}" style="animation-delay:${0.25 + k * 0.55}s">
+                <span class="who">${who}</span>
+                <span class="bubble">${text}</span>
+            </div>`).join('');
+        const twist = ch.hint ? `<p class="twist" style="animation-delay:${0.4 + ch.chat.length * 0.55}s"><b>New tonight:</b> ${ch.hint}</p>` : '';
+        overlay.innerHTML = `
+            <div class="ov-card chat-card" role="dialog" aria-live="polite">
+                <p class="kicker">${finale ? 'Walking home' : (ch.from === 0 ? 'Greek Row' : 'Houses ' + (ch.from + 1) + '\u2013' + Math.min(LEVELS.length, ch.from + 4))} &middot; ${ch.time}</p>
+                <div class="phone">
+                    <div class="phone-head"><span class="phone-title">Greek Row Tonight &#127867;</span><span class="phone-sub">group chat</span></div>
+                    <div class="msgs">${bubbles}</div>
+                </div>
+                ${twist}
+                <div class="actions">
+                    <button class="btn btn-primary" data-primary data-act="chat-go" type="button">${finale ? 'See how you did' : 'Let\u2019s go'}</button>
+                </div>
+            </div>`;
+        bindOverlay();
+    }
+
     function showFinal() {
+        showChat(STORY.finale, showFinalCard, true);
+    }
+
+    function showFinalCard() {
         state = 'final';
         let got = 0, total = 0, secs = 0;
         LEVELS.forEach((_, i) => { const b = save.best[i]; if (b) { got += b.got; total += b.total; secs += b.secs; } });
@@ -491,6 +603,7 @@
             return `<button class="lvl" type="button" data-act="level" data-i="${i}" ${locked ? 'disabled' : ''}>
                 <span class="num">House ${i + 1}${L.letters.toUpperCase() === L.name.toUpperCase() ? '' : ' &middot; ' + L.letters}</span>
                 <span class="nm">${L.name}</span>
+                <span class="diff" title="Difficulty">${'\u25CF'.repeat(L.difficulty || 1)}${'\u25CB'.repeat(5 - (L.difficulty || 1))}</span>
                 <span class="best">${locked ? 'Locked' : b ? `Best: ${b.got}/${b.total} drinks, ${fmtTime(b.secs * 60)}` : 'Not yet escaped'}</span>
             </button>`;
         }).join('');
@@ -539,8 +652,9 @@
             b.addEventListener('click', () => {
                 const act = b.dataset.act;
                 if (act === 'retry') startLevel(levelIndex);
-                else if (act === 'next') startLevel(levelIndex + 1);
-                else if (act === 'level') startLevel(+b.dataset.i);
+                else if (act === 'next') begin(levelIndex + 1);
+                else if (act === 'level') begin(+b.dataset.i);
+                else if (act === 'chat-go') { const fn = chatDone; chatDone = null; if (fn) fn(); }
                 else if (act === 'menu') { showMenu(false); }
                 else if (act === 'resume') resume();
                 else if (act === 'how') showHow();
@@ -646,6 +760,12 @@
                         t.fillStyle = '#c9c1ad'; t.fillRect(x, y, T, 5);
                         t.fillStyle = '#ece6d4'; t.fillRect(x, y, T, 2);
                     }
+                    if (sticky.has(c + ',' + r)) {
+                        t.fillStyle = 'rgba(150,40,190,0.85)';
+                        t.beginPath(); t.ellipse(x + 16, y + 2, 17, 4.5, 0, 0, Math.PI * 2); t.fill();
+                        t.fillStyle = 'rgba(220,120,255,0.6)';
+                        t.beginPath(); t.ellipse(x + 11, y + 1, 5, 1.5, 0, 0, Math.PI * 2); t.fill();
+                    }
                 } else {
                     // Liquid basin: brick below the waterline
                     t.save(); t.beginPath(); t.rect(x, y + 12, T, T - 12); t.clip();
@@ -684,9 +804,71 @@
         for (const l of levers) drawLever(l);
         for (const g of gems) if (!g.got) drawGem(g);
         for (const k of kegs) drawKeg(k);
-        for (const pl of players) if (!pl.dead) (pl.who === 'frat' ? drawFratboy : drawWondergirl)(ctx, pl, frame);
+        if (dd) drawDD(dd);
+        for (const pl of players) {
+            if (pl.dead || (pl.inv > 0 && (frame >> 2) % 2)) continue;
+            (pl.who === 'frat' ? drawFratboy : drawWondergirl)(ctx, pl, frame);
+        }
         drawParticles();
+        if (level.twists && level.twists.blackout) drawDarkness();
         drawPopups();
+    }
+
+    function drawDarkness() {
+        const d = darkCtx;
+        d.globalCompositeOperation = 'source-over';
+        d.clearRect(0, 0, W, H);
+        d.fillStyle = 'rgba(3,4,12,0.95)';
+        d.fillRect(0, 0, W, H);
+        d.globalCompositeOperation = 'destination-out';
+        const hole = (x, y, r, a) => {
+            const g = d.createRadialGradient(x, y, r * 0.3, x, y, r);
+            g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+            d.fillStyle = g; d.beginPath(); d.arc(x, y, r, 0, Math.PI * 2); d.fill();
+        };
+        for (const pl of players) if (!pl.dead) hole(pl.x + pl.w / 2, pl.y + pl.h / 2, 135 + Math.sin(frame * 0.05) * 4, 1);
+        for (const who of ['frat', 'wonder']) { const dr = doors[who]; hole(dr.x + 16, dr.y - 14, 34, 0.85); }
+        if (death && death.x) hole(death.x, death.y, 90, 1);
+        d.globalCompositeOperation = 'source-over';
+        ctx.drawImage(darkCanvas, 0, 0, W, H);
+    }
+
+    function drawDD(e) {
+        const f = e.dir;
+        ctx.save();
+        ctx.translate(e.x + e.w / 2, e.y);
+        // legs
+        const sw = Math.sin(e.walk) * 3;
+        ctx.fillStyle = '#2d3a5c';
+        roundRect(ctx, -6 + sw, 27, 5, 9, 2); ctx.fill();
+        roundRect(ctx, 1 - sw, 27, 5, 9, 2); ctx.fill();
+        // hoodie
+        ctx.fillStyle = '#6b7280';
+        roundRect(ctx, -9, 14, 18, 15, 5); ctx.fill();
+        // neon vest
+        ctx.fillStyle = '#d7ff1f';
+        ctx.fillRect(-9, 15, 6, 13); ctx.fillRect(3, 15, 6, 13);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-9, 22, 18, 2);
+        ctx.fillStyle = '#1a1a1a';
+        ctx.font = 'bold 7px "Open Sans", sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('DD', 0, 18.5);
+        // car keys swinging
+        ctx.strokeStyle = '#d9d9d9'; ctx.lineWidth = 1.2;
+        const kx = f * 11, ky = 24 + Math.sin(e.walk * 1.3) * 1.5;
+        ctx.beginPath(); ctx.arc(kx, ky, 2.4, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#f2c94c'; ctx.fillRect(kx - 1, ky + 2, 2, 5);
+        // head
+        ctx.fillStyle = '#e8b58c';
+        ctx.beginPath(); ctx.arc(0, 8, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#4a3222';
+        ctx.beginPath(); ctx.arc(0, 6, 8.2, Math.PI * 1.05, Math.PI * 1.95); ctx.fill();
+        // sober, judging face
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(f * 2 - 3.5, 8, 2, 2); ctx.fillRect(f * 2 + 1.5, 8, 2, 2);
+        ctx.fillRect(f * 2 - 2, 12.5, 4, 1.2);
+        ctx.restore();
     }
 
     function drawAttract() {
@@ -1074,7 +1256,7 @@
     // Debug hook for testing in the console
     window.__fw = {
         get state() { return state; }, get players() { return players; }, get platforms() { return platforms; },
-        get levers() { return levers; }, get kegs() { return kegs; }, get gems() { return gems; }, get death() { return death; },
+        get levers() { return levers; }, get kegs() { return kegs; }, get gems() { return gems; }, get dd() { return dd; }, get death() { return death; },
         start: startLevel, controls,
         tick(n) { for (let i = 0; i < n && state === 'playing'; i++) step(); render(); return state; }
     };
